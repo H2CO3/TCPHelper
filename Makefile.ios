@@ -1,0 +1,33 @@
+TARGET = TCPHelper
+OBJECTS = tcpconnect.o TCPHelper.o NSError+TCPHelper.o
+
+SYSROOT = /User/sysroot
+
+CC = gcc
+LD = $(CC)
+
+CFLAGS = -isysroot $(SYSROOT) \
+	 -Wall \
+	 -std=gnu99 \
+	 -c
+
+LDFLAGS = -isysroot $(SYSROOT) \
+	  -w \
+	  -dynamiclib \
+	  -lobjc \
+	  -framework Foundation
+
+all: $(TARGET)
+
+$(TARGET): $(OBJECTS)
+	$(LD) $(LDFLAGS) -o $@ -install_name /System/Library/Frameworks/$@.framework/$@ $^
+
+%.o: %.c
+	$(CC) $(CFLAGS) $^
+
+%.o: %.m
+	$(CC) $(CFLAGS) $^
+
+clean:
+	rm -f *.o $(TARGET)
+

@@ -1,0 +1,37 @@
+TARGET = TCPHelper.so
+OBJECTS = tcpconnect.o TCPHelper.o NSError+TCPHelper.o
+
+CC = gcc
+LD = $(CC)
+
+CFLAGS = -Wall \
+	 -std=gnu99 \
+	 -fPIC \
+	 -c
+	 
+OBJCFLAGS = -fconstant-string-class=NSConstantString \
+	    -fexceptions \
+	    -fobjc-exceptions \
+	    -D_NATIVE_OBJC_EXCEPTIONS
+
+LDFLAGS = -w \
+	  -shared \
+	  -fPIC \
+	  -lobjc \
+	  -lgnustep-base \
+	  -lpthread
+
+all: $(TARGET)
+
+$(TARGET): $(OBJECTS)
+	$(LD)  -o $@ $^ $(LDFLAGS)
+
+%.o: %.c
+	$(CC) $(CFLAGS) $^
+
+%.o: %.m
+	$(CC) $(CFLAGS) $(OBJCFLAGS) $^
+
+clean:
+	rm -f *.o $(TARGET)
+
