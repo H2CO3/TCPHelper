@@ -1,0 +1,53 @@
+TCPHelper is a collection of conveniently usable wrappers (C functions and Objective-C classes) around the BSD socket API using the TCP protocol.
+
+The idea behind TCPHelper is that when one needs a simple, one-to-one (server-client) connection, it can be implemented by
+BSD sockets, but that's not an evident kind of programming task. This helper aims to create a drop-in package to implement these simple
+functionalities. The APIs have been tested on iOS 4.2.1 and Ubuntu linux 11.10.
+
+The C function API
+------------------
+There are two functions, one of which is a server, the other is a client implementation. There are some similarities between the two:
+ - Both functions require a port number or newtork service (such as "http", "personal-agent", "ftp" or "telnet") as input. In addition, the client also takes a string representing the hostname or IP address of the server to be connected to.
+ - Both functions support IPv4 and IPv6. They silently choose that protocol whichever comes first in the addrinfo structure.
+ - Both functions return an integer file descriptor, which points to an open socket. This file descriptor can be read() from,
+   write()'n to, and close()'d. On error, they return a negative integer.
+
+The functions are the following:
+
+	int tcpconnect_start_server(char *port);
+
+This function starts listening on the given port. If any connection comes in that port, it accepts it and returns the associated socket file descriptor. Note that it doesn't return until a connection is estabilished. The 9-line server application using this function is (no error checking for the sake of simplicity):
+
+	#include "tcpconnect.h"
+	
+	int main(int argc, char **argv) {
+		int sockfd = tcpconnect_start_server(argv[1]); /* ./server 5555 */
+		char *msg = "Hello outside world!";
+		write(sockfd, msg, strlen(msg));
+		close(sockfd);
+		return 0;
+	}
+
+	int tcpconnect_start_client(char *hostname, char *port);
+
+This function tries to connect to a server at <hostname>, _already listening_ on <port>. If it finds it, it returns the associated socket file descriptor. This function also doesn't return until the server accepted the connection. One exception is when the host does NOT exist. Then it immediately returns with a negative value. Clien application:
+
+	#include "tcpconnect.h"
+	
+	int main(int argc, char **argv) {
+		int sockfd = tcpconnect_start_client(argv[1], argv[2]); /* ./client example.com 5555 */
+		char buf[64];
+		int len = read(sockfd, buf, 63);
+		close(sockfd);
+		buf[len] = '\0';
+		printf("%s\n", buf);
+		return 0;
+	}
+
+An asynchronously working wrapper Objective-C class, TCPHelper is built around these functions. It uses a delegation system to notify
+about its state changes, corresponding to certain network actions. The method names of this class are meant to be self-explanatory, so I've included some example code in Server.m and Client.m. (You can build them using `make sample'.)
+
+Happy networking!
+
+-- H2CO3
+

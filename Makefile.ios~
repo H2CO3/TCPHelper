@@ -14,7 +14,7 @@ CFLAGS = -isysroot $(SYSROOT) \
 	 -std=gnu99 \
 	 -c
 
-LDFLAGS = -isysroot $(SYSROOT) \
+LDFLAGS_SHARED = -isysroot $(SYSROOT) \
 	  -w \
 	  -lobjc \
 	  -framework Foundation
@@ -45,5 +45,5 @@ client: $(CLIENT_OBJECTS)
 	$(CC) $(CFLAGS) $^
 
 clean:
-	rm -f *.o $(TARGET) $(SAMPLE)
+	rm -f *.o $(TARGET)
 

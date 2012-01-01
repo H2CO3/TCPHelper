@@ -1,5 +1,8 @@
 TARGET = TCPHelper.so
 OBJECTS = tcpconnect.o TCPHelper.o NSError+TCPHelper.o
+SAMPLE = server client
+SERVER_OBJECTS = $(OBJECTS) Server.o
+CLIENT_OBJECTS = $(OBJECTS) Client.o
 
 CC = gcc
 LD = $(CC)
@@ -14,17 +17,28 @@ OBJCFLAGS = -fconstant-string-class=NSConstantString \
 	    -fobjc-exceptions \
 	    -D_NATIVE_OBJC_EXCEPTIONS
 
-LDFLAGS = -w \
+LDFLAGS_SHARED = -w \
 	  -shared \
 	  -fPIC \
 	  -lobjc \
-	  -lgnustep-base \
-	  -lpthread
+	  -lgnustep-base
+
+LDFLAGS = -w \
+	  -lobjc \
+	  -lgnustep-base
 
 all: $(TARGET)
 
-$(TARGET): $(OBJECTS)
+sample: server client
+
+server: $(SERVER_OBJECTS)
 	$(LD)  -o $@ $^ $(LDFLAGS)
+
+client: $(CLIENT_OBJECTS)
+	$(LD)  -o $@ $^ $(LDFLAGS)
+
+$(TARGET): $(OBJECTS)
+	$(LD)  -o $@ $^ $(LDFLAGS_SHARED)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $^
@@ -33,5 +47,5 @@ $(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJCFLAGS) $^
 
 clean:
-	rm -f *.o $(TARGET)
+	rm -f *.o $(TARGET) $(SAMPLE) *~
 
