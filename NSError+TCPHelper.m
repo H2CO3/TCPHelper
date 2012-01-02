@@ -23,6 +23,8 @@
 		desc = NSLocalizedString(@"No host or port specified. Please assign a valid port number or service name. In case of a client TCPHelper instance, you must also specify a valid host name or IP address.", NULL);
 	} else if (code == TCPHelperErrorNoData) {
 		desc = NSLocalizedString(@"Cannot send nil data. Please specify an initialized NSData object to be sent.", NULL);
+	} else if (code == TCPHelperErrorIO) {
+		desc = NSLocalizedString(@"I/O error; read() or write() returned -1.", NULL);
 	} else {
 		desc = NSLocalizedString(@"Unknown TCP error", NULL);
 	}

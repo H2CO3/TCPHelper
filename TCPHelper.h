@@ -26,6 +26,7 @@ typedef enum {
 	TCPHelperErrorDisconnected = 3,
 	TCPHelperErrorNoHostOrPort = 4,
 	TCPHelperErrorNoData = 5,
+	TCPHelperErrorIO = 6
 } TCPHelperError;
 
 @protocol TCPHelperDelegate;
@@ -55,7 +56,7 @@ typedef enum {
 - (void) connectToServer;
 - (void) disconnect;
 
-- (void) receiveDataOfMaxLength:(size_t)length;
+- (void) receiveData;
 - (void) sendData:(NSData *)data;
 
 @end

@@ -10,6 +10,9 @@
 #import "NSError+TCPHelper.h"
 #import "tcpconnect.h"
 
+/* Receive data in 512 kB chunks */
+#define CHUNK_SIZE (512 * 1024)
+
 
 @implementation TCPHelper
 
@@ -66,7 +69,12 @@
 		}
 		return;
 	}
-	[self performSelector:@selector(startServerInternal) withObject:NULL afterDelay:0.0];
+	NSThread *thread = [[NSThread alloc] initWithTarget:self selector:@selector(startServerInternal) object:NULL];
+	[thread start];
+	[thread release];
+	if ([self.delegate respondsToSelector:@selector(tcpHelperStartedRunning:)]) {
+		[self.delegate tcpHelperStartedRunning:self];
+	}
 }
 
 - (void) connectToServer {
@@ -85,7 +93,12 @@
 		}
 		return;
 	}
-	[self performSelector:@selector(connectToServerInternal) withObject:NULL afterDelay:0.0];
+	NSThread *thread = [[NSThread alloc] initWithTarget:self selector:@selector(connectToServerInternal) object:NULL];
+	[thread start];
+	[thread release];
+	if ([self.delegate respondsToSelector:@selector(tcpHelperStartedRunning:)]) {
+		[self.delegate tcpHelperStartedRunning:self];
+	}
 }
 
 - (void) disconnect {
@@ -109,7 +122,7 @@
 	}
 }
 
-- (void) receiveDataOfMaxLength:(size_t)length {
+- (void) receiveData {
 	if (![self isConnected]) {
 		/* can't read() without an open file descriptor */
 		if ([self.delegate respondsToSelector:@selector(tcpHelper:errorOccurred:)]) {
@@ -129,9 +142,9 @@
 		return;
 	}
 	ioInProgress = YES;
-	NSNumber *num = [[NSNumber alloc] initWithUnsignedInt:length];
-	[self performSelector:@selector(receiveDataInternal:) withObject:num afterDelay:0.0];
-	[num release];
+	NSThread *thread = [[NSThread alloc] initWithTarget:self selector:@selector(receiveDataInternal) object:NULL];
+	[thread start];
+	[thread release];
 }
 
 - (void) sendData:(NSData *)data {
@@ -163,16 +176,16 @@
 		return;
 	}
 	ioInProgress = YES;
-	[self performSelector:@selector(sendDataInternal:) withObject:data afterDelay:0.0];
+	NSThread *thread = [[NSThread alloc] initWithTarget:self selector:@selector(sendDataInternal:) object:data];
+	[thread start];
+	[thread release];
 }
 
 /* Internal helper methods */
 
 - (void) startServerInternal {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	state = TCPHelperStateServerRunning;
-	if ([self.delegate respondsToSelector:@selector(tcpHelperStartedRunning:)]) {
-		[self.delegate tcpHelperStartedRunning:self];
-	}
 	sockfd = tcpconnect_start_server([self.port UTF8String]);
 	if (sockfd < 0) {
 		/* error from socket(), setsockopt(), getaddrinfo(), connect(), bind(), listen() or accept() */
@@ -188,13 +201,12 @@
 	if ([self.delegate respondsToSelector:@selector(tcpHelperConnected:)]) {
 		[self.delegate tcpHelperConnected:self];
 	}
+	[pool release];
 }
 
 - (void) connectToServerInternal {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	state = TCPHelperStateClientRunning;
-	if ([self.delegate respondsToSelector:@selector(tcpHelperStartedRunning:)]) {
-		[self.delegate tcpHelperStartedRunning:self];
-	}
 	sockfd = tcpconnect_start_client([self.host UTF8String], [self.port UTF8String]);
 	if (sockfd < 0) {
 		/* error from socket(), setsockopt(), getaddrinfo(), connect(), bind(), listen() or accept() */
@@ -210,26 +222,63 @@
 	if ([self.delegate respondsToSelector:@selector(tcpHelperConnected:)]) {
 		[self.delegate tcpHelperConnected:self];
 	}
+	[pool release];
 }
 
-- (void) receiveDataInternal:(NSNumber *)num {
-	size_t max_len = [num unsignedIntValue];
-	char *buf = malloc(max_len);
-	size_t length = read(sockfd, buf, max_len);
-	NSData *data = [NSData dataWithBytes:buf length:length];
+- (void) receiveDataInternal {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	NSMutableData *data = [[NSMutableData alloc] init];
+	char *buf = malloc(CHUNK_SIZE);
+	ssize_t length = 0;
+	do {
+		/* Be prepared to non-blocking sockets */
+		length = read(sockfd, buf, CHUNK_SIZE);
+		if (length < 0) {
+			/* error */
+			ioInProgress = NO;
+			if ([self.delegate respondsToSelector:@selector(tcpHelper:errorOccurred:)]) {
+				NSError *err = [[NSError alloc] initWithTCPHelperError:TCPHelperErrorIO];
+				[self.delegate tcpHelper:self errorOccurred:err];
+				[err release];
+			}
+			return;
+		}
+		[data appendBytes:buf length:length];
+	} while (length); /* length == 0 means EOF */
 	free(buf);
 	ioInProgress = NO;
 	if ([self.delegate respondsToSelector:@selector(tcpHelper:receivedData:)]) {
 		[self.delegate tcpHelper:self receivedData:data];
 	}
+	[data release];
+	[pool release];
 }
 
 - (void) sendDataInternal:(NSData *)data {
-	write(sockfd, [data bytes], [data length]);
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	ssize_t length = [data length];
+	const char *buf = [data bytes];
+	while (length) {
+		/* Be prepared to non-blocking sockets */
+		ssize_t len_written = write(sockfd, buf, length);
+		if (len_written < 0) {
+			/* error */
+			ioInProgress = NO;
+			if ([self.delegate respondsToSelector:@selector(tcpHelper:errorOccurred:)]) {
+				NSError *err = [[NSError alloc] initWithTCPHelperError:TCPHelperErrorIO];
+				[self.delegate tcpHelper:self errorOccurred:err];
+				[err release];
+			}
+			return;
+		}
+		length -= len_written;
+		buf += len_written;
+	}
 	ioInProgress = NO;
 	if ([self.delegate respondsToSelector:@selector(tcpHelper:sentData:)]) {
 		[self.delegate tcpHelper:self sentData:data];
 	}
+	[pool release];
 }
 
 @end
