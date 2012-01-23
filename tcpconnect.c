@@ -49,7 +49,7 @@ int tcpconnect_start_client(const char *hostname, const char *port) {
 	return sockfd;
 }
 
-int tcpconnect_start_server(const char *port) {
+int tcpconnect_start_multiple(const char *port) {
 	int status = 0; /* return status of the inet/socket functions */
 	struct addrinfo *servinfo = NULL;
 	struct addrinfo hints;
@@ -102,14 +102,28 @@ int tcpconnect_start_server(const char *port) {
 		return -1;
 	}
 	
+	return sockfd;
+}
+
+int tcpconnect_accept_single(int stubfd) {
 	struct sockaddr_storage client_addr; /* client's address info */
 	socklen_t clientaddr_size = sizeof(client_addr);
-	int newsockfd = accept(sockfd, (struct sockaddr *)&client_addr, &clientaddr_size);
-	close(sockfd);
+	int newsockfd = accept(stubfd, (struct sockaddr *)&client_addr, &clientaddr_size);
 	if (newsockfd < 0) {
 		return -1;
 	}
-	
 	return newsockfd;
 }
 
+int tcpconnect_start_server(const char *port) {
+	int stubfd = tcpconnect_start_multiple(port);
+	if (stubfd < 0) {
+		return -1;
+	}
+	int sockfd = tcpconnect_accept_single(stubfd);
+	close(stubfd);
+	if (sockfd < 0) {
+		return -1;
+	}
+	return sockfd;
+}

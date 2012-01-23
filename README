@@ -44,6 +44,29 @@ This function tries to connect to a server at <hostname>, _already listening_ on
 		return 0;
 	}
 
+To write a server that accepts multiple connections, do like this:
+
+	#include "tcpconnect.h"
+	
+	int main(int argc, char **argv) {
+		int sockfd = tcpconnect_start_multiple(argv[1]); /* ./server 5555 */
+		int acceptsock = 0;
+		while (1) {
+			acceptsock = tcpconnect_accept_single(sockfd);
+			/* create a new thread or fork() and pass the new thread/process
+			   the returned file descriptor
+			   Example:
+			   pthread_t tid;
+			   int *sockptr = malloc(sizeof (int));
+			   *sockptr = accpetsock;
+			   pthread_create(&tid, NULL, server_thread_function, sockptr);
+			*/ 
+		}
+		return 0;
+	}
+
+
+
 An asynchronously working wrapper Objective-C class, TCPHelper is built around these functions. It uses a delegation system to notify
 about its state changes, corresponding to certain network actions. The method names of this class are meant to be self-explanatory, so I've included some example code in Server.m and Client.m. (You can build them using `make sample'.)
 
