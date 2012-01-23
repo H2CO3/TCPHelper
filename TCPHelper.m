@@ -241,6 +241,8 @@
 				[self.delegate tcpHelper:self errorOccurred:err];
 				[err release];
 			}
+			free(buf);
+			[data release];
 			return;
 		}
 		[data appendBytes:buf length:length];
