@@ -26,7 +26,8 @@ typedef enum {
 	TCPHelperErrorDisconnected = 3,
 	TCPHelperErrorNoHostOrPort = 4,
 	TCPHelperErrorNoData = 5,
-	TCPHelperErrorIO = 6
+	TCPHelperErrorIO = 6,
+	TCPHelperErrorTimedOut = 7
 } TCPHelperError;
 
 @protocol TCPHelperDelegate;
@@ -37,12 +38,14 @@ typedef enum {
 	NSString *port;
 	NSString *host;
 	BOOL ioInProgress;
+	NSTimeInterval timeout;
 	id <TCPHelperDelegate> delegate;
 }
 
 @property (nonatomic, readonly) TCPHelperState state;
 @property (nonatomic, readonly) NSString *port;
 @property (nonatomic, readonly) NSString *host;
+@property (nonatomic, assign) NSTimeInterval timeout;
 @property (nonatomic, assign) id <TCPHelperDelegate> delegate;
 
 - (id) initWithHost:(NSString *)theHost port:(NSString *)thePort;
