@@ -134,7 +134,8 @@ int tcpconnect_accept_single(int stubfd)
 int tcpconnect_start_server(const char *port)
 {
 	int stubfd = tcpconnect_start_multiple(port);
-	if (stubfd < 0){
+	if (stubfd < 0)
+	{
 		return -1;
 	}
 	int sockfd = tcpconnect_accept_single(stubfd);
