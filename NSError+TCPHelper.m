@@ -1,9 +1,9 @@
 /*
-  NSError+TCPHelper.m
-  TCPHelper
-  
-  Created by Árpád Goretity on 01/01/2012.
-  Released into the public domain
+ * NSError+TCPHelper.m
+ * TCPHelper
+ *
+ * Created by Árpád Goretity on 01/01/2012.
+ * Released into the public domain
 */
 
 #import "NSError+TCPHelper.h"

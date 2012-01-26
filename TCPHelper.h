@@ -1,11 +1,12 @@
 /*
-  TCPHelper.h
-  TCPHelper
-  
-  Created by Árpád Goretity on 01/01/2012.
-  Released into the public domain
+ * TCPHelper.h
+ * TCPHelper
+ *
+ * Created by Árpád Goretity on 01/01/2012.
+ * Released into the public domain
 */
 
+#import <stdint.h>
 #import <Foundation/Foundation.h>
 
 #define TCPHelperErrorDomain @"TCPHelperErrorDomain"
@@ -39,6 +40,7 @@ typedef enum {
 	NSString *host;
 	BOOL ioInProgress;
 	NSTimeInterval timeout;
+	uint32_t chunkSize;
 	id <TCPHelperDelegate> delegate;
 }
 
@@ -46,6 +48,7 @@ typedef enum {
 @property (nonatomic, readonly) NSString *port;
 @property (nonatomic, readonly) NSString *host;
 @property (nonatomic, assign) NSTimeInterval timeout;
+@property (nonatomic, assign) uint32_t chunkSize;
 @property (nonatomic, assign) id <TCPHelperDelegate> delegate;
 
 - (id) initWithHost:(NSString *)theHost port:(NSString *)thePort;
@@ -67,13 +70,30 @@ typedef enum {
 
 @protocol TCPHelperDelegate <NSObject>
 @optional
+
+/*
+ * Connection methods
+*/
 - (void) tcpHelperStartedRunning:(TCPHelper *)helper;
 - (void) tcpHelperConnected:(TCPHelper *)helper;
 - (void) tcpHelperDisconnected:(TCPHelper *)helper;
 
+/*
+ * Progress observation
+*/
 - (void) tcpHelper:(TCPHelper *)helper receivedData:(NSData *)data;
 - (void) tcpHelper:(TCPHelper *)helper sentData:(NSData *)data;
 
+/*
+ * Completion methods
+*/
+- (void) tcpHelperFinishedSendingData:(TCPHelper *)helper;
+- (void) tcpHelperFinishedReceivingData:(TCPHelper *)helper;
+
+/*
+ * Error handling
+*/
 - (void) tcpHelper:(TCPHelper *)helper errorOccurred:(NSError *)error;
+
 @end
 

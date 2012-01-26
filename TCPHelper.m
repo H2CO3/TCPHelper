@@ -1,17 +1,14 @@
 /*
-  TCPHelper.m
-  TCPHelper
-  
-  Created by Árpád Goretity on 01/01/2012.
-  Released into the public domain
+ * TCPHelper.m
+ * TCPHelper
+ *
+ * Created by Árpád Goretity on 01/01/2012.
+ * Released into the public domain
 */
 
 #import "TCPHelper.h"
 #import "NSError+TCPHelper.h"
 #import "tcpconnect.h"
-
-/* Receive data in 512 kB chunks */
-#define CHUNK_SIZE (512 * 1024)
 
 
 @implementation TCPHelper
@@ -20,6 +17,7 @@
 		port = port,
 		host = host,
 		timeout = timeout,
+		chunkSize = chunkSize,
 		delegate = delegate;
 
 - (id) initWithHost:(NSString *)theHost port:(NSString *)thePort
@@ -29,6 +27,8 @@
 		host = [theHost copy];
 		port = [thePort copy];
 		state = TCPHelperStateInactive;
+		/* default chunk size is 512 kB */
+		self.chunkSize = 512 * 1024;
 		ioInProgress = NO;
 	}
 	return self;
@@ -284,13 +284,12 @@
 - (void) receiveDataInternal
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSMutableData *data = [[NSMutableData alloc] init];
-	char *buf = malloc(CHUNK_SIZE);
+	char *buf = malloc(self.chunkSize);
 	ssize_t length = 0;
 	do
 	{
 		/* Be prepared to non-blocking sockets */
-		length = read(sockfd, buf, CHUNK_SIZE);
+		length = read(sockfd, buf, self.chunkSize);
 		if (length < 0)
 		{
 			/* error */
@@ -302,18 +301,21 @@
 				[err release];
 			}
 			free(buf);
-			[data release];
 			return;
 		}
-		[data appendBytes:buf length:length];
+		if ([self.delegate respondsToSelector:@selector(tcpHelper:receivedData:)])
+		{
+			NSData *data = [[NSData alloc] initWithBytes:buf length:length];
+			[self.delegate tcpHelper:self receivedData:data];
+			[data release];
+		}
 	} while (length); /* length == 0 means EOF */
 	free(buf);
 	ioInProgress = NO;
-	if ([self.delegate respondsToSelector:@selector(tcpHelper:receivedData:)])
+	if ([self.delegate respondsToSelector:@selector(tcpHelperFinishedReceivingData:)])
 	{
-		[self.delegate tcpHelper:self receivedData:data];
+		[self.delegate tcpHelperFinishedReceivingData:self];
 	}
-	[data release];
 	[pool release];
 }
 
@@ -325,7 +327,8 @@
 	while (length)
 	{
 		/* Be prepared to non-blocking sockets */
-		ssize_t len_written = write(sockfd, buf, length);
+		size_t sendlen = length < self.chunkSize ? length : self.chunkSize;
+		ssize_t len_written = write(sockfd, buf, sendlen);
 		if (len_written < 0)
 		{
 			/* error */
@@ -338,13 +341,19 @@
 			}
 			return;
 		}
+		if ([self.delegate respondsToSelector:@selector(tcpHelper:sentData:)])
+		{
+			NSData *subdata = [[NSData alloc] initWithBytes:buf length:len_written];
+			[self.delegate tcpHelper:self sentData:subdata];
+			[subdata release];
+		}
 		length -= len_written;
 		buf += len_written;
 	}
 	ioInProgress = NO;
-	if ([self.delegate respondsToSelector:@selector(tcpHelper:sentData:)])
+	if ([self.delegate respondsToSelector:@selector(tcpHelperFinishedSendingData:)])
 	{
-		[self.delegate tcpHelper:self sentData:data];
+		[self.delegate tcpHelperFinishedSendingData:self];
 	}
 	[pool release];
 }
