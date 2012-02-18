@@ -10,6 +10,10 @@
 #ifndef __TCPCONNECT_H__
 #define __TCPCONNECT_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -58,6 +62,10 @@ int tcpconnect_start_multiple(const char *port);
 */
 
 int tcpconnect_accept_single(int stubfd);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* !__TCPCONNECT_H__ */
 
