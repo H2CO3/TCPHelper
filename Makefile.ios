@@ -4,9 +4,9 @@ SAMPLE = server client
 SERVER_OBJECTS = $(OBJECTS) Server.o
 CLIENT_OBJECTS = $(OBJECTS) Client.o
 
-SYSROOT = /User/sysroot
+SYSROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk
 
-CC = gcc
+CC = clang
 LD = $(CC)
 
 CFLAGS = -isysroot $(SYSROOT) \

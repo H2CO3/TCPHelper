@@ -54,7 +54,7 @@
 
 - (void) tcpHelper:(TCPHelper *)helper receivedData:(NSData *)data
 {
-	NSLog(@"Data received: %d bytes", [data length]);
+	NSLog(@"Data received: %zu bytes", (size_t)[data length]);
 }
 
 - (void) tcpHelperFinishedReceivingData:(TCPHelper *)helper

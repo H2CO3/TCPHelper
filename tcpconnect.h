@@ -7,8 +7,8 @@
  * with no warranty of any kind
 */
 
-#ifndef __TCPCONNECT_H__
-#define __TCPCONNECT_H__
+#ifndef TCPCONNECT_H
+#define TCPCONNECT_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,16 +49,16 @@ int tcpconnect_start_client(const char *hostname, const char *port);
 int tcpconnect_start_server(const char *port);
 
 /*
-  Returns a file descriptor, which can be supplied to tcpconnect_accept_single in order to retrieve
-  a read()able-write()able socket file descriptor.
+  Returns a file descriptor, which can be supplied to tcpconnect_accept_single
+  in order to retrieve a read()able-write()able socket file descriptor.
 */
 
 int tcpconnect_start_multiple(const char *port);
 
 /*
-  Takes a socket file descriptor returned by tcpconnect_start_multiple(). This blocks until a
-  client connects to the other end of the socket.
-  Returns a readable-writable socket file descriptor on success or negative on error.
+  Takes a socket file descriptor returned by tcpconnect_start_multiple().
+  This blocks until a client connects to the other end of the socket.
+  Returns a readable-writable socket file descriptor on success or -1 on error.
 */
 
 int tcpconnect_accept_single(int stubfd);
@@ -67,5 +67,4 @@ int tcpconnect_accept_single(int stubfd);
 }
 #endif /* __cplusplus */
 
-#endif /* !__TCPCONNECT_H__ */
-
+#endif /* TCPCONNECT_H */

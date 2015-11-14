@@ -57,7 +57,7 @@
 
 - (void) tcpHelper:(TCPHelper *)helper sentData:(NSData *)data
 {
-	NSLog(@"Data sent: %d bytes!", [data length]);
+	NSLog(@"Data sent: %zu bytes!", (size_t)[data length]);
 }
 
 - (void) tcpHelperFinishedSendingData:(TCPHelper *)helper
