@@ -11,6 +11,12 @@
 #import "TCPHelper.h"
 #import "tcpconnect.h"
 
+static NSError *errorWithCode(TCPHelperError code)
+{
+	return [NSError errorWithDomain:@"TCPHelperErrorDomain"
+	                           code:code
+	                       userInfo:nil];
+}
 
 @interface TCPHelper()
 
@@ -71,9 +77,7 @@
 	if (self.port.length == 0) {
 		// cannot connect without a port
 		if (self.errorHandler) {
-			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-			                                   code:TCPHelperErrorNoHostOrPort
-			                               userInfo:nil];
+			NSError *err = errorWithCode(TCPHelperErrorNoHostOrPort);
 			self.errorHandler(err);
 		}
 		return;
@@ -103,9 +107,7 @@
 	if (self.port.length == 0 || self.host.length == 0) {
 		// cannot connect without a port and a host
 		if (self.errorHandler) {
-			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-			                                   code:TCPHelperErrorNoHostOrPort
-			                               userInfo:nil];
+			NSError *err = errorWithCode(TCPHelperErrorNoHostOrPort);
 			self.errorHandler(err);
 		}
 		return;
@@ -128,9 +130,7 @@
 	if (self.ioInProgress) {
 		// don't disconnect while sending or receiving data
 		if (self.errorHandler) {
-			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-			                                   code:TCPHelperErrorBusy
-			                               userInfo:nil];
+			NSError *err = errorWithCode(TCPHelperErrorBusy);
 			self.errorHandler(err);
 		}
 		return;
@@ -153,9 +153,7 @@
 	if ([self isConnected] == NO) {
 		// can't read() without an open file descriptor
 		if (self.errorHandler) {
-			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-			                                  code:TCPHelperErrorDisconnected
-			                              userInfo:nil];
+			NSError *err = errorWithCode(TCPHelperErrorDisconnected);
 			self.errorHandler(err);
 		}
 		return;
@@ -164,9 +162,7 @@
 	if (self.ioInProgress) {
 		// can't read() simultaneously from the same descriptor
 		if (self.errorHandler) {
-			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-			                                   code:TCPHelperErrorBusy
-			                               userInfo:nil];
+			NSError *err = errorWithCode(TCPHelperErrorBusy);
 			self.errorHandler(err);
 		}
 		return;
@@ -183,9 +179,7 @@
 	if ([self isConnected] == NO) {
 		// can't write() without an open file descriptor
 		if (self.errorHandler) {
-			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-			                                   code:TCPHelperErrorDisconnected
-			                               userInfo:nil];
+			NSError *err = errorWithCode(TCPHelperErrorDisconnected);
 			self.errorHandler(err);
 		}
 		return;
@@ -194,9 +188,7 @@
 	if (self.ioInProgress) {
 		// can't write() simultaneously from the same descriptor
 		if (self.errorHandler) {
-			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-			                                   code:TCPHelperErrorBusy
-			                               userInfo:nil];
+			NSError *err = errorWithCode(TCPHelperErrorBusy);
 			self.errorHandler(err);
 		}
 		return;
@@ -205,9 +197,7 @@
 	if (data == nil) {
 		// if there's nothing, can't send anything
 		if (self.errorHandler) {
-			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-			                                   code:TCPHelperErrorNoData
-			                               userInfo:nil];
+			NSError *err = errorWithCode(TCPHelperErrorNoData);
 			self.errorHandler(err);
 		}
 		return;
@@ -227,9 +217,7 @@
 	if ([self isRunning] && [self isConnected] == NO) {
 		[self disconnect];
 		if (self.errorHandler) {
-			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-			                                 code:TCPHelperErrorTimedOut
-			                             userInfo:nil];
+			NSError *err = errorWithCode(TCPHelperErrorTimedOut);
 			self.errorHandler(err);
 		}
 	}
@@ -245,9 +233,7 @@
 		self.state = TCPHelperStateInactive;
 
 		if (self.errorHandler) {
-			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-			                                   code:TCPHelperErrorSocket
-			                               userInfo:nil];
+			NSError *err = errorWithCode(TCPHelperErrorSocket);
 			self.errorHandler(err);
 		}
 		return;
@@ -270,9 +256,7 @@
 		self.state = TCPHelperStateInactive;
 
 		if (self.errorHandler) {
-			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-			                                   code:TCPHelperErrorSocket
-			                               userInfo:nil];
+			NSError *err = errorWithCode(TCPHelperErrorSocket);
 			self.errorHandler(err);
 		}
 		return;
@@ -296,9 +280,7 @@
 			// error
 			self.ioInProgress = NO;
 			if (self.errorHandler) {
-				NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-				                                   code:TCPHelperErrorIO
-				                               userInfo:nil];
+				NSError *err = errorWithCode(TCPHelperErrorIO);
 				self.errorHandler(err);
 			}
 
@@ -333,9 +315,7 @@
 			// error
 			self.ioInProgress = NO;
 			if (self.errorHandler) {
-				NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-				                                   code:TCPHelperErrorIO
-				                               userInfo:nil];
+				NSError *err = errorWithCode(TCPHelperErrorIO);
 				self.errorHandler(err);
 			}
 			return;
