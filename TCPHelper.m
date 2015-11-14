@@ -72,8 +72,8 @@
 		// cannot connect without a port
 		if (self.errorHandler) {
 			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-																				 code:TCPHelperErrorNoHostOrPort
-																		 userInfo:nil];
+			                                   code:TCPHelperErrorNoHostOrPort
+			                               userInfo:nil];
 			self.errorHandler(err);
 		}
 		return;
@@ -81,10 +81,10 @@
 
 	if (self.timeout > 0) {
 		[NSTimer scheduledTimerWithTimeInterval:self.timeout
-																		 target:self
-																	 selector:@selector(timedOut)
-																	 userInfo:nil
-																		repeats:NO];
+		                                 target:self
+		                               selector:@selector(timedOut)
+		                               userInfo:nil
+		                                repeats:NO];
 	}
 
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
@@ -104,8 +104,8 @@
 		// cannot connect without a port and a host
 		if (self.errorHandler) {
 			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-																				 code:TCPHelperErrorNoHostOrPort
-																		 userInfo:nil];
+			                                   code:TCPHelperErrorNoHostOrPort
+			                               userInfo:nil];
 			self.errorHandler(err);
 		}
 		return;
@@ -113,10 +113,10 @@
 
 	if (self.timeout > 0) {
 		[NSTimer scheduledTimerWithTimeInterval:self.timeout
-																		 target:self
-																	 selector:@selector(timedOut)
-																	 userInfo:nil
-																		repeats:NO];
+		                                 target:self
+		                               selector:@selector(timedOut)
+		                               userInfo:nil
+		                                repeats:NO];
 	}
 
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
@@ -129,8 +129,8 @@
 		// don't disconnect while sending or receiving data
 		if (self.errorHandler) {
 			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-																				 code:TCPHelperErrorBusy
-																		 userInfo:nil];
+			                                   code:TCPHelperErrorBusy
+			                               userInfo:nil];
 			self.errorHandler(err);
 		}
 		return;
@@ -154,8 +154,8 @@
 		// can't read() without an open file descriptor
 		if (self.errorHandler) {
 			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-																				code:TCPHelperErrorDisconnected
-																		userInfo:nil];
+			                                  code:TCPHelperErrorDisconnected
+			                              userInfo:nil];
 			self.errorHandler(err);
 		}
 		return;
@@ -165,8 +165,8 @@
 		// can't read() simultaneously from the same descriptor
 		if (self.errorHandler) {
 			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-																				 code:TCPHelperErrorBusy
-																		 userInfo:nil];
+			                                   code:TCPHelperErrorBusy
+			                               userInfo:nil];
 			self.errorHandler(err);
 		}
 		return;
@@ -184,8 +184,8 @@
 		// can't write() without an open file descriptor
 		if (self.errorHandler) {
 			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-																				 code:TCPHelperErrorDisconnected
-																		 userInfo:nil];
+			                                   code:TCPHelperErrorDisconnected
+			                               userInfo:nil];
 			self.errorHandler(err);
 		}
 		return;
@@ -195,8 +195,8 @@
 		// can't write() simultaneously from the same descriptor
 		if (self.errorHandler) {
 			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-																				 code:TCPHelperErrorBusy
-																		 userInfo:nil];
+			                                   code:TCPHelperErrorBusy
+			                               userInfo:nil];
 			self.errorHandler(err);
 		}
 		return;
@@ -206,8 +206,8 @@
 		// if there's nothing, can't send anything
 		if (self.errorHandler) {
 			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-																				 code:TCPHelperErrorNoData
-																		 userInfo:nil];
+			                                   code:TCPHelperErrorNoData
+			                               userInfo:nil];
 			self.errorHandler(err);
 		}
 		return;
@@ -228,8 +228,8 @@
 		[self disconnect];
 		if (self.errorHandler) {
 			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-																			 code:TCPHelperErrorTimedOut
-																	 userInfo:nil];
+			                                 code:TCPHelperErrorTimedOut
+			                             userInfo:nil];
 			self.errorHandler(err);
 		}
 	}
@@ -246,8 +246,8 @@
 
 		if (self.errorHandler) {
 			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-																				 code:TCPHelperErrorSocket
-																		 userInfo:nil];
+			                                   code:TCPHelperErrorSocket
+			                               userInfo:nil];
 			self.errorHandler(err);
 		}
 		return;
@@ -271,8 +271,8 @@
 
 		if (self.errorHandler) {
 			NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-																				 code:TCPHelperErrorSocket
-																		 userInfo:nil];
+			                                   code:TCPHelperErrorSocket
+			                               userInfo:nil];
 			self.errorHandler(err);
 		}
 		return;
@@ -297,8 +297,8 @@
 			self.ioInProgress = NO;
 			if (self.errorHandler) {
 				NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-																					 code:TCPHelperErrorIO
-																			 userInfo:nil];
+				                                   code:TCPHelperErrorIO
+				                               userInfo:nil];
 				self.errorHandler(err);
 			}
 
@@ -334,8 +334,8 @@
 			self.ioInProgress = NO;
 			if (self.errorHandler) {
 				NSError *err = [NSError errorWithDomain:NSCocoaErrorDomain
-																					 code:TCPHelperErrorIO
-																			 userInfo:nil];
+				                                   code:TCPHelperErrorIO
+				                               userInfo:nil];
 				self.errorHandler(err);
 			}
 			return;
