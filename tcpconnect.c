@@ -5,7 +5,7 @@
  * Created by Árpád Goretity on 30/12/2011.
  * Released into the public domain,
  * with no warranty of any kind
-*/
+ */
 
 #include "tcpconnect.h"
 

@@ -1,28 +1,29 @@
 TARGET = TCPHelper
-OBJECTS = tcpconnect.o TCPHelper.o NSError+TCPHelper.o
+OBJECTS = tcpconnect.o TCPHelper.o 
 SAMPLE = server client
 SERVER_OBJECTS = $(OBJECTS) Server.o
 CLIENT_OBJECTS = $(OBJECTS) Client.o
 
-SYSROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk
-
-CC = clang
+CC = xcrun -sdk iphoneos clang
 LD = $(CC)
 
-CFLAGS = -isysroot $(SYSROOT) \
-	 -Wall \
-	 -std=gnu99 \
-	 -c
+CFLAGS = -Wall \
+	-arch armv7 \
+	-miphoneos-version-min=6.0 \
+	-fmodules \
+	-fobjc-arc \
+	-std=c99 \
+	-c
 
-LDFLAGS = -isysroot $(SYSROOT) \
-	  -w \
-	  -lobjc \
-	  -framework Foundation
+LDFLAGS = -lobjc \
+	-arch armv7 \
+	-miphoneos-version-min=6.0 \
+	-framework Foundation
 
-LDFLAGS_SHARED = -isysroot $(SYSROOT) \
-	  -w \
+LDFLAGS_SHARED = -lobjc \
+	  -arch armv7 \
+		-miphoneos-version-min=6.0 \
 	  -dynamiclib \
-	  -lobjc \
 	  -framework Foundation
 
 all: $(TARGET)

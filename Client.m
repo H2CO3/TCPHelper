@@ -4,93 +4,78 @@
  *
  * Created by Árpád Goretity on 01/01/2012.
  * Launch me using: ./client <servername_or_ip> <port>
-*/
+ */
 
-#import <Foundation/Foundation.h>
+@import Foundation;
+
 #import "TCPHelper.h"
 
-@interface Client: NSObject <TCPHelperDelegate>
-{
-	TCPHelper *tcpHelper;
-}
 
-- (id) initWithHost:(NSString *)host port:(NSString *)port;
+@interface Client: NSObject
+
+@property (nonatomic, strong) TCPHelper *tcpHelper;
+
+- (instancetype)initWithHost:(NSString *)host port:(NSString *)port;
 
 @end
 
 @implementation Client
 
-- (id) initWithHost:(NSString *)host port:(NSString *)port
-{
-	if ((self = [self init]))
-	{
-		tcpHelper = [[TCPHelper alloc] initWithHost:host port:port];
-		tcpHelper.delegate = self;
-		[tcpHelper connectToServer];
+- (instancetype)initWithHost:(NSString *)host port:(NSString *)port {
+	if (self = [self init]) {
+		self.tcpHelper = [[TCPHelper alloc] initWithHost:host port:port];
+
+		__weak Client *weakSelf = self;
+
+		self.tcpHelper.connectedHandler = ^{
+			NSLog(@"Connected on port %@, receiving data...", weakSelf.tcpHelper.port);
+			[weakSelf.tcpHelper receiveData];
+		};
+
+		self.tcpHelper.disconnectedHandler = ^{
+			NSLog(@"Disconnected, exiting.");
+			exit(0);
+		};
+
+		self.tcpHelper.receivedDataHandler = ^(NSData *data) {
+			NSLog(@"Data received: \"%s\" (%zu bytes)", data.bytes, (size_t)[data length]);
+		};
+
+		self.tcpHelper.finishedReceivingHandler = ^{
+			NSLog(@"Finsihed receiving data! Disconnecting...");
+			[weakSelf.tcpHelper disconnect];
+		};
+
+		self.tcpHelper.errorHandler = ^(NSError *error) {
+			NSLog(@"Error: %@", error);
+		};
+
+		[self.tcpHelper startClient];
+		NSLog(@"Listening on port %@...", self.tcpHelper.port);
 	}
 	return self;
-}
-
-- (void) dealloc
-{
-	[tcpHelper release];
-	[super dealloc];
-}
-
-/*
- * TCPHelperDelegate
-*/
-
-- (void) tcpHelperStartedRunning:(TCPHelper *)helper
-{
-	NSLog(@"Listening on port %@", helper.port);
-}
-
-- (void) tcpHelperConnected:(TCPHelper *)helper
-{
-	NSLog(@"Connected on port %@, receiving data...", helper.port);
-	[helper receiveData];
-}
-
-- (void) tcpHelper:(TCPHelper *)helper receivedData:(NSData *)data
-{
-	NSLog(@"Data received: %zu bytes", (size_t)[data length]);
-}
-
-- (void) tcpHelperFinishedReceivingData:(TCPHelper *)helper
-{
-	NSLog(@"Finsihed receiving data! Disconnecting...");
-	[helper disconnect];
-}
-
-- (void) tcpHelperDisconnected:(TCPHelper *)helper
-{
-	NSLog(@"Disconnected, exiting.");
-	exit(0);
 }
 
 @end
 
 int main(int argc, char **argv)
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	@autoreleasepool {
+		NSRunLoop *rl = [NSRunLoop currentRunLoop];
+		NSTimer *tmr = [[NSTimer alloc] initWithFireDate:[NSDate date]
+		                                        interval:60.0
+		                                          target:nil
+		                                        selector:NULL
+		                                        userInfo:nil
+		                                         repeats:YES];
+		[rl addTimer:tmr forMode:NSDefaultRunLoopMode];
 
-	NSRunLoop *rl = [NSRunLoop currentRunLoop];
-	NSDate *now = [[NSDate alloc] init];
-	NSTimer *tmr = [[NSTimer alloc] initWithFireDate:now interval:60.0 target:NULL selector:NULL userInfo:NULL repeats:YES];
-	[now release];
-	[rl addTimer:tmr forMode:NSDefaultRunLoopMode];
-	[tmr release];
+		NSString *host = [NSString stringWithUTF8String:argv[1]];
+		NSString *port = [NSString stringWithUTF8String:argv[2]];
+		Client *client = [[Client alloc] initWithHost:host port:port];
 
-	NSString *host = [NSString stringWithUTF8String:argv[1]];
-	NSString *port = [NSString stringWithUTF8String:argv[2]];
-	Client *client = [[Client alloc] initWithHost:host port:port];
+		[rl run];
 
-	[rl run];
-	
-	[client release];
-	[pool release];
-
-	return 0;
+		return 0;
+	}
 }
-
